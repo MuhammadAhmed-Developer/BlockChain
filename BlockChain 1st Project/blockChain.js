@@ -14,7 +14,7 @@ class BlockChain {
   }
 
   replaceChain(chain){
-    if(chain<=this.chain.length){
+    if(chain.length <= this.chain.length){
         console.error("The Icoming Chain is not Longer")
         return
     }
@@ -28,11 +28,13 @@ class BlockChain {
   static isValidChain(chain){
     if(JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
     for (let i = 1; i < chain.length; i++) {
-        const {timeStamp,prevHash,hash,data} = chain[i]
+        const {timeStamp,prevHash,hash,data,nonce,difficulty} = chain[i]
+        const lastDifficulty = chain[i - 1].difficulty
         const realLastHash = chain[i-1].hash
         if(prevHash !== realLastHash) return false
-        const validatedHash = cryptoHash(timeStamp,prevHash,data)
+        const validatedHash = cryptoHash(timeStamp,prevHash,data,nonce,difficulty)
         if(hash !== validatedHash) return false
+        if(Math.abs(lastDifficulty - difficulty) > 1) return false
     }
     return true
   }
@@ -40,6 +42,7 @@ class BlockChain {
 
 const blockChain = new BlockChain();
 blockChain.addBlock({ data: "mining" });
+blockChain.addBlock({ data: "block2" });
 const result = BlockChain.isValidChain(blockChain.chain)
-console.log("result", result);
+// console.log("result", blockChain);
 module.exports = BlockChain;
